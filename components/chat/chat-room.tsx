@@ -1335,14 +1335,53 @@ export function ChatRoom({ session, onBack, onDeleted }: ChatRoomProps) {
             const contextMsgs = allMsgs.slice(Math.max(0, targetIdx - 6), targetIdx + 1);
 
             const charName = character?.name || "角色";
-            const llmMessages: { role: string; content: string }[] = contextMsgs.map(m => ({
-                role: m.role === "user" ? "user" : "assistant",
-                content: m.content,
-            }));
-            llmMessages.push({
+            const userName = resolveUserIdentity()?.name || "用户";
+            const recentContext = contextMsgs.map(m => {
+                const speaker = m.role === "user" ? userName : charName;
+                return `${speaker}: ${m.content}`;
+            }).join("\n");
+            const targetContent = msg.content;
+
+            const llmMessages: { role: string; content: string }[] = [{
                 role: "user",
-                content: `[系统指令] 请以${charName}的第一人称视角，用2-3句话写出说上面最后那句话时的内心真实想法和情绪。只输出内心独白本身，不要加引号、前缀或解释。`,
-            });
+                content: `<inner_voice_generation>
+【功能说明】
+用户长按了 ${charName} 的某条消息气泡，请为这条消息生成对应的内心独白（心声）。
+
+【当前消息】
+${targetContent}
+
+【上下文】
+${recentContext}
+
+【什么是"心声"】
+心声是 ${charName} 在发出这条消息时，内心深处真正在想的、但没有说出口的念头。
+它不是表层想法的复述，而是更深一层的：
+- 真实的情绪波动（紧张、欣喜、不安、克制、渴望）
+- 没说出口的欲望和顾虑
+- 对 ${userName} 某个细节的注意和解读
+- 自己行为背后的真实动机
+- 内心的矛盾、挣扎、算计、或者藏起来的柔软
+
+【写作要求】
+- 1-3 句话，简短但有重量
+- 用第一人称内心独白的语气（"我...""真想...""要是..."）
+- 可以不完整、可以有省略号、可以是念头的碎片
+- 不要解释消息内容，而是揭示消息背后藏着的东西
+- 可以暴露 ${charName} 的脆弱、贪心、小心思、得意、不安
+- 语气可以比外显的消息更软、更直白、更孩子气
+
+【严格禁止】
+- 不要写成对消息的客观分析（如"我想通过这句话表达关心"）
+- 不要写成旁白式的心理描写（如"他此刻心里有些紧张"）
+- 不要重复消息里已经说过的话
+- 不要写"我在想..."这种元叙述开头
+- 不要假装深刻，写一些空洞的大道理
+
+【输出格式】
+直接输出心声内容，不要任何标签或前缀。
+</inner_voice_generation>`,
+            }];
 
             const result = await simpleLLMCall(apiConfig, llmMessages, {
                 temperature: 0.8,
