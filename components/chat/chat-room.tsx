@@ -1314,7 +1314,7 @@ export function ChatRoom({ session, onBack, onDeleted }: ChatRoomProps) {
             setReasoningTranslating(false);
         }
     };
-    // ── 心声（长按 assistant 气泡 → 查看角色说这句话时的内心想法）──
+    // ── 心声（长按气泡 → 查看角色说这句话时的内心想法）──
     const [innerVoiceMsg, setInnerVoiceMsg] = useState<ChatMessage | null>(null);
     const [innerVoiceText, setInnerVoiceText] = useState("");
     const [innerVoiceLoading, setInnerVoiceLoading] = useState(false);
@@ -6802,18 +6802,13 @@ export function ChatRoom({ session, onBack, onDeleted }: ChatRoomProps) {
 
             {/* 心声弹窗：长按 assistant 气泡 → 点"心声" → AI 补写角色内心想法 */}
             {innerVoiceMsg && (
-                <div className="modal-overlay" data-ui="modal" onClick={() => setInnerVoiceMsg(null)}>
+                <div className="modal-overlay" data-ui="modal" onClick={() => setInnerVoiceMsg(null)} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <div
                         className="chat-thought-card"
                         onClick={e => e.stopPropagation()}
                         style={{
-                            position: "fixed",
-                            bottom: "20%",
-                            left: "50%",
-                            transform: "translateX(-50%)",
                             width: "80%",
                             maxWidth: 320,
-                            zIndex: 999,
                         }}
                     >
                         <div className="chat-thought-tape-left" />
